@@ -1,5 +1,8 @@
 # QuoteAI
 
+Supplier comparison is available from each RFQ. See
+[comparison rules and manual tests](docs/supplier-comparison.md).
+
 QuoteAI is a procurement workspace for creating RFQs, collecting supplier
 quotations, and reviewing AI-assisted extraction before a user saves data.
 

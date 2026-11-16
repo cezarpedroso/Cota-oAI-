@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Plus, SquarePen } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
+import { getLocale } from "@/lib/locale/server";
 
 export const instant = false;
 
@@ -26,6 +27,7 @@ export default async function Page({
     .maybeSingle();
 
   if (!data) notFound();
+  const locale = await getLocale();
 
   return (
     <AppShell email={user.email ?? ""}>
@@ -56,6 +58,12 @@ export default async function Page({
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
+            <Link
+              href={`/rfqs/${id}/compare`}
+              className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700"
+            >
+              {locale === "en" ? "Compare Suppliers" : "Comparar fornecedores"}
+            </Link>
             <Link
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
               href={`/rfqs/${id}/edit`}
