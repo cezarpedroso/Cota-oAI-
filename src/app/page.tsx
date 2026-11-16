@@ -7,8 +7,15 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
+import { LanguageToggle } from "@/components/language-toggle";
+import { getCopy } from "@/lib/locale/copy";
+import { getLocale } from "@/lib/locale/server";
 
-export default function Home() {
+export const instant = false;
+
+export default async function Home() {
+  const locale = await getLocale();
+  const t = getCopy(locale).home;
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
       <Image
@@ -23,39 +30,41 @@ export default function Home() {
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 sm:px-10">
         <header className="flex items-center justify-between py-7 sm:py-9">
           <BrandMark tone="light" />
-          <Link
-            className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-            href="/login"
-          >
-            Entrar
-          </Link>
+          <div className="flex items-center gap-2">
+            <LanguageToggle locale={locale} tone="dark" />
+            <Link
+              className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+              href="/login"
+            >
+              {t.signIn}
+            </Link>
+          </div>
         </header>
 
         <section className="grid flex-1 items-center gap-14 py-14 lg:grid-cols-[1.15fr_0.85fr] lg:py-20">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">
-              Procurement intelligence
+              {t.eyebrow}
             </p>
             <h1 className="mt-6 text-4xl font-semibold leading-[1.04] tracking-[-0.055em] text-white sm:text-6xl">
-              Controle de compras, da solicitação à decisão.
+              {t.title}
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-200 sm:text-xl">
-              Organize RFQs, reúna cotações e conduza decisões com uma visão
-              financeira mais clara do seu processo de compras.
+              {t.description}
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-slate-950/20 transition hover:bg-slate-100"
                 href="/signup"
               >
-                Criar espaço de trabalho
+                {t.createWorkspace}
                 <ArrowRight size={17} />
               </Link>
               <Link
                 className="inline-flex items-center justify-center rounded-lg border border-white/20 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
                 href="/login"
               >
-                Acessar plataforma
+                {t.accessPlatform}
               </Link>
             </div>
           </div>
@@ -64,20 +73,18 @@ export default function Home() {
             {[
               {
                 icon: ClipboardCheck,
-                title: "Solicitações estruturadas",
-                description: "Itens, requisitos e histórico em um único fluxo.",
+                title: t.cards[0][0],
+                description: t.cards[0][1],
               },
               {
                 icon: BarChart3,
-                title: "Cotações comparáveis",
-                description:
-                  "Termos comerciais organizados para análise rápida.",
+                title: t.cards[1][0],
+                description: t.cards[1][1],
               },
               {
                 icon: ShieldCheck,
-                title: "Dados protegidos",
-                description:
-                  "Acesso por usuário e políticas de segurança na base.",
+                title: t.cards[2][0],
+                description: t.cards[2][1],
               },
             ].map(({ icon: Icon, title, description }) => (
               <article
@@ -95,7 +102,7 @@ export default function Home() {
         </section>
 
         <footer className="border-t border-white/10 py-5 text-xs text-slate-400">
-          CotaçãoAI · Gestão profissional de compras e cotações.
+          {t.footer}
         </footer>
       </div>
     </main>

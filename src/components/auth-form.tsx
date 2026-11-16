@@ -1,25 +1,30 @@
 "use client";
 import { useActionState } from "react";
 import type { AuthState } from "@/lib/auth/actions";
+import { getCopy } from "@/lib/locale/copy";
+import type { Locale } from "@/lib/locale/types";
 
 export function AuthForm({
   action,
   signup = false,
+  locale,
 }: {
   action: (s: AuthState, f: FormData) => Promise<AuthState>;
   signup?: boolean;
+  locale: Locale;
 }) {
+  const t = getCopy(locale).auth;
   const [state, formAction, pending] = useActionState(action, {});
   return (
     <form action={formAction} className="space-y-5" noValidate>
       {signup && (
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-slate-800">
-            Nome
+            {t.name}
           </span>
           <input
             name="displayName"
-            placeholder="Como devemos chamar você?"
+            placeholder={t.namePlaceholder}
             className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
             autoComplete="name"
             required
@@ -28,12 +33,12 @@ export function AuthForm({
       )}
       <label className="block">
         <span className="mb-2 block text-sm font-medium text-slate-800">
-          E-mail
+          {t.email}
         </span>
         <input
           name="email"
           type="email"
-          placeholder="voce@empresa.com"
+          placeholder={t.emailPlaceholder}
           className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
           autoComplete="email"
           required
@@ -41,12 +46,12 @@ export function AuthForm({
       </label>
       <label className="block">
         <span className="mb-2 block text-sm font-medium text-slate-800">
-          Senha
+          {t.password}
         </span>
         <input
           name="password"
           type="password"
-          placeholder="Mínimo de 8 caracteres"
+          placeholder={t.passwordPlaceholder}
           minLength={8}
           className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
           autoComplete={signup ? "new-password" : "current-password"}
@@ -73,7 +78,7 @@ export function AuthForm({
         disabled={pending}
         className="w-full rounded-lg bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-950/15 transition hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {pending ? "Aguarde…" : signup ? "Criar conta" : "Entrar"}
+        {pending ? t.wait : signup ? t.signUp : t.signIn}
       </button>
     </form>
   );

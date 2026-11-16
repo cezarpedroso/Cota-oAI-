@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CotaçãoAI",
+  title: "QuoteAI",
   description: "Procurement quotation comparison workspace",
 };
 

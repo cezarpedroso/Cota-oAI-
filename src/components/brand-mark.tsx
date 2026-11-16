@@ -20,7 +20,7 @@ export function BrandMark({
         <ChartNoAxesCombined size={19} strokeWidth={2.25} aria-hidden="true" />
       </span>
       <span className="text-xl">
-        Cotação<span className={accent}>AI</span>
+        Quote<span className={accent}>AI</span>
       </span>
     </Link>
   );

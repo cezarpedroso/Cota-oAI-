@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ArrowRight, FileText, ReceiptText } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { getCopy } from "@/lib/locale/copy";
+import { getLocale } from "@/lib/locale/server";
 export const instant = false;
 export default async function Rfqs() {
   const s = await createClient();
@@ -10,6 +12,8 @@ export default async function Rfqs() {
     data: { user },
   } = await s.auth.getUser();
   if (!user) redirect("/login");
+  const locale = await getLocale();
+  const t = getCopy(locale).rfqs;
   const { data } = await s
     .from("rfq_sessions")
     .select(
@@ -22,20 +26,20 @@ export default async function Rfqs() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
-              Solicitações
+              {t.eyebrow}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
-              Solicitações de compra
+              {t.title}
             </h1>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Organize os itens que precisam de cotação.
+              {t.description}
             </p>
           </div>
           <Link
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
             href="/rfqs/new"
           >
-            Nova solicitação
+            {getCopy(locale).app.newRequest}
           </Link>
         </div>
         {data?.length ? (
@@ -59,8 +63,8 @@ export default async function Rfqs() {
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-slate-500">
-                      Criada em{" "}
-                      {new Intl.DateTimeFormat("pt-BR", {
+                      {t.createdOn}{" "}
+                      {new Intl.DateTimeFormat(locale, {
                         dateStyle: "medium",
                       }).format(new Date(r.created_at))}{" "}
                       · {r.currency}
@@ -81,15 +85,13 @@ export default async function Rfqs() {
           </ul>
         ) : (
           <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="font-medium">Nenhuma solicitação criada</p>
-            <p className="mt-1 text-sm text-slate-500">
-              Crie uma solicitação para começar a receber cotações.
-            </p>
+            <p className="font-medium">{t.emptyTitle}</p>
+            <p className="mt-1 text-sm text-slate-500">{t.emptyDescription}</p>
             <Link
               href="/rfqs/new"
               className="mt-4 inline-block text-sm font-medium text-blue-600"
             >
-              Criar solicitação
+              {t.createRequest}
             </Link>
           </div>
         )}

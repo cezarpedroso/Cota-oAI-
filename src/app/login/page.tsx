@@ -2,21 +2,28 @@ import Link from "next/link";
 import { AuthForm } from "@/components/auth-form";
 import { AuthLayout } from "@/components/auth-layout";
 import { login } from "@/lib/auth/actions";
+import { getCopy } from "@/lib/locale/copy";
+import { getLocale } from "@/lib/locale/server";
 
-export default function Page() {
+export const instant = false;
+
+export default async function Page() {
+  const locale = await getLocale();
+  const t = getCopy(locale).auth;
   return (
     <AuthLayout
-      title="Bem-vindo de volta"
-      description="Entre para acompanhar suas solicitações, cotações e decisões de compra."
+      title={t.loginTitle}
+      description={t.loginDescription}
+      locale={locale}
     >
-      <AuthForm action={login} />
+      <AuthForm action={login} locale={locale} />
       <p className="mt-6 text-sm text-slate-600">
-        Ainda não usa o CotaçãoAI?{" "}
+        {t.loginPrompt}{" "}
         <Link
           className="font-semibold text-blue-700 hover:text-blue-800"
           href="/signup"
         >
-          Criar conta
+          {t.loginLink}
         </Link>
       </p>
     </AuthLayout>

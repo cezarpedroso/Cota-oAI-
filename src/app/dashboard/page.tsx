@@ -9,6 +9,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { getCopy } from "@/lib/locale/copy";
+import { getLocale } from "@/lib/locale/server";
 export const instant = false;
 export default async function Dashboard() {
   const s = await createClient();
@@ -16,6 +18,8 @@ export default async function Dashboard() {
     data: { user },
   } = await s.auth.getUser();
   if (!user) redirect("/login");
+  const locale = await getLocale();
+  const t = getCopy(locale).dashboard;
   const [
     { count: rfqs },
     { count: drafts },
@@ -35,9 +39,9 @@ export default async function Dashboard() {
       .limit(5),
   ]);
   const stats: { label: string; value: number | null; icon: LucideIcon }[] = [
-    { label: "Solicitações", value: rfqs, icon: ClipboardList },
-    { label: "Rascunhos", value: drafts, icon: FileText },
-    { label: "Cotações", value: quotes, icon: ReceiptText },
+    { label: t.requests, value: rfqs, icon: ClipboardList },
+    { label: t.drafts, value: drafts, icon: FileText },
+    { label: t.quotes, value: quotes, icon: ReceiptText },
   ];
 
   return (
@@ -46,20 +50,20 @@ export default async function Dashboard() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
-              Visão geral
+              {t.eyebrow}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-              Compras sob controle
+              {t.title}
             </h1>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Acompanhe suas solicitações e cotações em um único lugar.
+              {t.description}
             </p>
           </div>
           <Link
             href="/rfqs/new"
             className="hidden rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 sm:block"
           >
-            Nova solicitação
+            {t.createRequest}
           </Link>
         </div>
         <div className="my-8 grid gap-4 sm:grid-cols-3">
@@ -82,12 +86,12 @@ export default async function Dashboard() {
         </div>
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Solicitações recentes</h2>
+            <h2 className="font-semibold">{t.recentRequests}</h2>
             <Link
               href="/rfqs"
               className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700 hover:text-blue-800"
             >
-              Ver todas <ArrowRight size={15} />
+              {t.viewAll} <ArrowRight size={15} />
             </Link>
           </div>
           {recent?.length ? (
@@ -108,17 +112,15 @@ export default async function Dashboard() {
             </ul>
           ) : (
             <div className="mt-6 rounded-lg border border-dashed border-slate-300 p-6 text-center">
-              <p className="font-medium">
-                Sua primeira solicitação começa aqui
-              </p>
+              <p className="font-medium">{t.emptyTitle}</p>
               <p className="mt-1 text-sm text-slate-500">
-                Adicione itens e receba cotações de fornecedores.
+                {t.emptyDescription}
               </p>
               <Link
                 href="/rfqs/new"
                 className="mt-4 inline-block text-sm font-medium text-blue-600"
               >
-                Criar solicitação
+                {t.createRequest}
               </Link>
             </div>
           )}

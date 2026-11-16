@@ -2,17 +2,22 @@ import Link from "next/link";
 import { ClipboardList, LayoutDashboard, LogOut, Plus } from "lucide-react";
 import { logout } from "@/lib/auth/actions";
 import { BrandMark } from "@/components/brand-mark";
+import { LanguageToggle } from "@/components/language-toggle";
+import { getCopy } from "@/lib/locale/copy";
+import { getLocale } from "@/lib/locale/server";
 
-export function AppShell({
+export async function AppShell({
   children,
   email,
 }: {
   children: React.ReactNode;
   email: string;
 }) {
+  const locale = await getLocale();
+  const t = getCopy(locale).app;
   const nav = [
-    { href: "/dashboard", label: "Visão geral", icon: LayoutDashboard },
-    { href: "/rfqs", label: "Solicitações", icon: ClipboardList },
+    { href: "/dashboard", label: t.overview, icon: LayoutDashboard },
+    { href: "/rfqs", label: t.requests, icon: ClipboardList },
   ];
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-950">
@@ -23,7 +28,7 @@ export function AppShell({
           className="mb-8 mt-10 flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-3 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-950/15 transition hover:bg-blue-800"
         >
           <Plus size={16} />
-          Nova solicitação
+          {t.newRequest}
         </Link>
         <nav className="space-y-1" aria-label="Navegação principal">
           {nav.map(({ href, label, icon: Icon }) => (
@@ -38,8 +43,9 @@ export function AppShell({
           ))}
         </nav>
         <div className="mt-auto rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+          <LanguageToggle locale={locale} />
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-            Conta
+            {t.account}
           </p>
           <p className="mt-1 truncate text-sm font-medium text-slate-700">
             {email}
@@ -47,19 +53,22 @@ export function AppShell({
           <form action={logout}>
             <button className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-950">
               <LogOut size={15} />
-              Sair
+              {t.signOut}
             </button>
           </form>
         </div>
       </aside>
       <main className="lg:pl-[272px]">
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-5 backdrop-blur lg:hidden">
-          <BrandMark href="/dashboard" />
+          <div className="flex items-center gap-2">
+            <BrandMark href="/dashboard" />
+            <LanguageToggle locale={locale} />
+          </div>
           <Link
             href="/rfqs/new"
             className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm"
           >
-            Nova RFQ
+            {t.newRequest}
           </Link>
         </header>
         {children}
