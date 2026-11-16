@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   compareSuppliers,
+  normalizeUnit,
   weightsSchema,
   type ComparisonInput,
 } from "@/features/comparison/engine";
@@ -31,6 +32,41 @@ export function fixture(): ComparisonInput {
   };
 }
 describe("supplier comparison", () => {
+  it.each([
+    ["ea", "each"],
+    [" units ", "each"],
+    ["UNIDADE", "each"],
+    ["cx.", "box"],
+    ["caixas", "box"],
+    ["kilogram", "kg"],
+    ["quilograma", "kg"],
+    ["METER", "m"],
+    ["metros", "m"],
+  ])("normalizes equivalent unit %s", (input, expected) => {
+    expect(normalizeUnit(input)).toBe(expected);
+  });
+
+  it("keeps unknown units unknown", () => {
+    expect(normalizeUnit("pallet")).toBeNull();
+    expect(normalizeUnit("")).toBeNull();
+  });
+
+  it("does not equate different measurement dimensions", () => {
+    expect(normalizeUnit("box")).not.toBe(normalizeUnit("ea"));
+    expect(normalizeUnit("kg")).not.toBe(normalizeUnit("m"));
+  });
+
+  it("compares equivalent Portuguese and English units", () => {
+    const f = fixture();
+    f.items[0].unit = " ea. ";
+    f.quotes.forEach((quote) => {
+      quote.quote_items[0].unit = "UNIDADE";
+    });
+    const result = compareSuppliers(f);
+    expect(result.offers.every((offer) => !offer.issues.includes("unit"))).toBe(true);
+    expect(result.offers.every((offer) => offer.complete)).toBe(true);
+  });
+
   it("calculates exact totals, charges and spread", () => {
     const f = fixture();
     f.quotes[0].freight_cost = "0.1";

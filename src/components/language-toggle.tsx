@@ -32,11 +32,11 @@ export function LanguageToggle({
       }
       className={
         tone === "dark"
-          ? "inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
-          : "inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
+          ? "inline-flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
+          : "inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
       }
     >
-      <Languages size={15} aria-hidden="true" />
+      <Languages size={13} aria-hidden="true" />
       {pending ? "…" : locale === "pt-BR" ? "EN" : "PT"}
     </button>
   );

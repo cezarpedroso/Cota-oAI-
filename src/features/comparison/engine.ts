@@ -64,6 +64,38 @@ export type Issue =
   | "overflow"
   | "negativeTotal";
 
+const unitAliases: Record<string, string> = {
+  ea: "each",
+  each: "each",
+  unit: "each",
+  units: "each",
+  un: "each",
+  unidade: "each",
+  unidades: "each",
+  cx: "box",
+  caixa: "box",
+  caixas: "box",
+  box: "box",
+  boxes: "box",
+  kg: "kg",
+  kilogram: "kg",
+  kilograms: "kg",
+  quilograma: "kg",
+  quilogramas: "kg",
+  m: "m",
+  meter: "m",
+  meters: "m",
+  metro: "m",
+  metros: "m",
+};
+
+/** Returns a canonical identifier only for known equivalent units. */
+export function normalizeUnit(unit: string | null | undefined): string | null {
+  if (!unit) return null;
+  const key = unit.trim().toLowerCase().replace(/\./g, "").replace(/\s+/g, " ");
+  return unitAliases[key] ?? null;
+}
+
 export function compareSuppliers(
   raw: ComparisonInput,
   weights: Weights = defaultWeights,
@@ -85,8 +117,9 @@ export function compareSuppliers(
         if (line.quantity === null || !new D(line.quantity).eq(item.quantity))
           issues.add("quantity");
         if (
-          !line.unit ||
-          line.unit.trim().toLowerCase() !== item.unit.trim().toLowerCase()
+          normalizeUnit(line.unit) === null ||
+          normalizeUnit(item.unit) === null ||
+          normalizeUnit(line.unit) !== normalizeUnit(item.unit)
         )
           issues.add("unit");
         if (line.unit_price === null) issues.add("price");
@@ -146,7 +179,9 @@ export function compareSuppliers(
         r.total !== null &&
         r.line.quantity !== null &&
         new D(r.line.quantity).eq(r.item.quantity) &&
-        r.line.unit?.trim().toLowerCase() === r.item.unit.trim().toLowerCase(),
+        normalizeUnit(r.line.unit) !== null &&
+        normalizeUnit(r.item.unit) !== null &&
+        normalizeUnit(r.line.unit) === normalizeUnit(r.item.unit),
     ).length;
     const knownTerms = [
       quote.currency,

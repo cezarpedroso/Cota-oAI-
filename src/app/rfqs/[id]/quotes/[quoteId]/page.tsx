@@ -77,11 +77,14 @@ export default async function Page({
             [
               t("Delivery", "Prazo"),
               quote.delivery_days === null
-                ? "Não informado"
+                ? t("Not provided", "Não informado")
                 : `${quote.delivery_days} ${t("days", "dias")}`,
             ],
             [t("Payment terms", "Pagamento"), text(quote.payment_terms)],
-            [t("Lines", "Linhas"), `${items.length} item(ns)`],
+            [
+              t("Lines", "Linhas"),
+              `${items.length} ${t("item(s)", "item(ns)")}`,
+            ],
           ].map(([label, value]) => (
             <div
               className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"

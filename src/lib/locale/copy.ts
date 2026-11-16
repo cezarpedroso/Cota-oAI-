@@ -8,6 +8,7 @@ export const copy = {
       newRequest: "Nova solicitação",
       account: "Conta",
       signOut: "Sair",
+      mainNavigation: "Navegação principal",
     },
     home: {
       signIn: "Entrar",
@@ -132,6 +133,29 @@ export const copy = {
       emptyDescription: "Crie uma solicitação para começar a receber cotações.",
       createRequest: "Criar solicitação",
     },
+    rfqDetail: {
+      back: "Solicitações",
+      descriptionMissing: "Sem descrição.",
+      edit: "Editar",
+      addQuote: "Adicionar cotação",
+      requestedItems: "Itens solicitados",
+      itemCount: "item(ns)",
+      supplierQuotes: "Cotações de fornecedores",
+      registeredCount: "registrada(s)",
+      currencyMissing: "Moeda não informada",
+      deliveryMissing: "Prazo não informado",
+      days: "dias",
+      noQuotes: "Ainda não há cotações",
+      noQuotesDescription:
+        "Adicione a primeira proposta de fornecedor para começar a comparar.",
+      addFirstQuote: "Adicionar cotação",
+    },
+    editRfq: {
+      title: "Editar solicitação",
+      description: "Descrição",
+      currency: "Moeda",
+      save: "Salvar",
+    },
   },
   en: {
     app: {
@@ -140,6 +164,7 @@ export const copy = {
       newRequest: "New request",
       account: "Account",
       signOut: "Sign out",
+      mainNavigation: "Main navigation",
     },
     home: {
       signIn: "Sign in",
@@ -263,6 +288,29 @@ export const copy = {
       emptyTitle: "No requests yet",
       emptyDescription: "Create a request to start receiving quotations.",
       createRequest: "Create request",
+    },
+    rfqDetail: {
+      back: "Requests",
+      descriptionMissing: "No description provided.",
+      edit: "Edit",
+      addQuote: "Add supplier quotation",
+      requestedItems: "Requested items",
+      itemCount: "item(s)",
+      supplierQuotes: "Supplier quotations",
+      registeredCount: "registered",
+      currencyMissing: "Currency not provided",
+      deliveryMissing: "Delivery not provided",
+      days: "days",
+      noQuotes: "No quotations yet",
+      noQuotesDescription:
+        "Add the first supplier proposal to start comparing.",
+      addFirstQuote: "Add quotation",
+    },
+    editRfq: {
+      title: "Edit request",
+      description: "Description",
+      currency: "Currency",
+      save: "Save",
     },
   },
 } as const;

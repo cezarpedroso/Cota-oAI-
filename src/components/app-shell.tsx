@@ -30,7 +30,7 @@ export async function AppShell({
           <Plus size={16} />
           {t.newRequest}
         </Link>
-        <nav className="space-y-1" aria-label="Navegação principal">
+        <nav className="space-y-1" aria-label={t.mainNavigation}>
           {nav.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}

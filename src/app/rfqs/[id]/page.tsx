@@ -4,6 +4,7 @@ import { AppShell } from "@/components/app-shell";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { getLocale } from "@/lib/locale/server";
+import { getCopy } from "@/lib/locale/copy";
 
 export const instant = false;
 
@@ -28,6 +29,7 @@ export default async function Page({
 
   if (!data) notFound();
   const locale = await getLocale();
+  const t = getCopy(locale).rfqDetail;
 
   return (
     <AppShell email={user.email ?? ""}>
@@ -37,7 +39,7 @@ export default async function Page({
           className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
         >
           <ArrowLeft size={16} />
-          Solicitações
+          {t.back}
         </Link>
 
         <header className="mt-5 flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
@@ -54,7 +56,7 @@ export default async function Page({
               {data.title}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              {data.description || "Sem descrição."}
+              {data.description || t.descriptionMissing}
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
@@ -62,30 +64,30 @@ export default async function Page({
               href={`/rfqs/${id}/compare`}
               className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700"
             >
-              {locale === "en" ? "Compare Suppliers" : "Comparar fornecedores"}
+              {locale === "en" ? "Compare suppliers" : "Comparar fornecedores"}
             </Link>
             <Link
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
               href={`/rfqs/${id}/edit`}
             >
               <SquarePen size={16} />
-              Editar
+              {t.edit}
             </Link>
             <Link
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-950/15 transition hover:bg-blue-800"
               href={`/rfqs/${id}/quotes/new`}
             >
               <Plus size={16} />
-              Adicionar cotação
+              {t.addQuote}
             </Link>
           </div>
         </header>
 
         <section className="mt-10 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-            <h2 className="font-semibold">Itens solicitados</h2>
+            <h2 className="font-semibold">{t.requestedItems}</h2>
             <span className="text-sm text-slate-500">
-              {data.rfq_items.length} item(ns)
+              {data.rfq_items.length} {t.itemCount}
             </span>
           </div>
           <div className="divide-y divide-slate-100">
@@ -114,9 +116,9 @@ export default async function Page({
 
         <section className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-            <h2 className="font-semibold">Cotações de fornecedores</h2>
+            <h2 className="font-semibold">{t.supplierQuotes}</h2>
             <span className="text-sm text-slate-500">
-              {data.vendor_quotes.length} registrada(s)
+              {data.vendor_quotes.length} {t.registeredCount}
             </span>
           </div>
           {data.vendor_quotes.length ? (
@@ -139,14 +141,13 @@ export default async function Page({
                         {quote.vendor_name}
                       </p>
                       <p className="text-sm text-slate-500">
-                        {quote.status} ·{" "}
-                        {quote.currency ?? "Moeda não informada"}
+                        {quote.status} · {quote.currency ?? t.currencyMissing}
                       </p>
                     </div>
                     <span className="flex items-center gap-2 text-sm text-slate-500">
                       {quote.delivery_days === null
-                        ? "Prazo não informado"
-                        : `${quote.delivery_days} dias`}
+                        ? t.deliveryMissing
+                        : `${quote.delivery_days} ${t.days}`}
                       <ArrowRight size={16} />
                     </span>
                   </Link>
@@ -155,16 +156,15 @@ export default async function Page({
             </div>
           ) : (
             <div className="p-8 text-center">
-              <p className="font-medium">Ainda não há cotações</p>
+              <p className="font-medium">{t.noQuotes}</p>
               <p className="mt-1 text-sm text-slate-500">
-                Adicione a primeira proposta de fornecedor para começar a
-                comparar.
+                {t.noQuotesDescription}
               </p>
               <Link
                 href={`/rfqs/${id}/quotes/new`}
                 className="mt-4 inline-block text-sm font-semibold text-blue-700 hover:text-blue-800"
               >
-                Adicionar cotação
+                {t.addFirstQuote}
               </Link>
             </div>
           )}

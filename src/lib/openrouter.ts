@@ -4,6 +4,32 @@ import {
   type Extraction,
 } from "../features/extraction/schema";
 
+export class OpenRouterRequestError extends Error {
+  constructor(
+    public readonly kind: "http" | "timeout" | "network" | "response",
+    public readonly status?: number,
+    message?: string,
+  ) {
+    super(message ?? `OpenRouter request failed (${kind}).`);
+    this.name = "OpenRouterRequestError";
+  }
+}
+
+function normalizeDecimalFields(value: unknown): unknown {
+  if (!value || typeof value !== "object") return value;
+  const input = value as Record<string, unknown>;
+  const output: Record<string, unknown> = { ...input };
+  for (const field of ["freight", "taxes", "discount", "quantity", "unitPrice"]) {
+    if (typeof output[field] === "number" && Number.isFinite(output[field])) {
+      output[field] = String(output[field]);
+    }
+  }
+  if (Array.isArray(output.items)) {
+    output.items = output.items.map(normalizeDecimalFields);
+  }
+  return output;
+}
+
 export async function extractQuotation(rawText: string): Promise<Extraction> {
   const key = process.env.OPENROUTER_API_KEY;
   const model =
@@ -25,6 +51,52 @@ export async function extractQuotation(rawText: string): Promise<Extraction> {
         body: JSON.stringify({
           model,
           temperature: 0,
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "supplier_quotation_extraction",
+              strict: true,
+              schema: {
+                type: "object",
+                additionalProperties: false,
+                required: [
+                  "supplierName",
+                  "currency",
+                  "freight",
+                  "taxes",
+                  "discount",
+                  "deliveryDays",
+                  "paymentTerms",
+                  "notes",
+                  "items",
+                ],
+                properties: {
+                  supplierName: { type: ["string", "null"] },
+                  currency: { type: ["string", "null"], enum: ["BRL", "USD", null] },
+                  freight: { type: ["string", "null"] },
+                  taxes: { type: ["string", "null"] },
+                  discount: { type: ["string", "null"] },
+                  deliveryDays: { type: ["integer", "null"], minimum: 0 },
+                  paymentTerms: { type: ["string", "null"] },
+                  notes: { type: ["string", "null"] },
+                  items: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["description", "quantity", "unit", "unitPrice"],
+                      properties: {
+                        description: { type: "string" },
+                        quantity: { type: "string" },
+                        unit: { type: ["string", "null"] },
+                        unitPrice: { type: ["string", "null"] },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           messages: [
             {
               role: "system",
@@ -36,18 +108,51 @@ export async function extractQuotation(rawText: string): Promise<Extraction> {
         }),
       },
     );
-    if (!response.ok) throw new Error("AI extraction request failed.");
+    if (!response.ok) {
+      throw new OpenRouterRequestError("http", response.status);
+    }
     const body = await response.json();
     const content = body?.choices?.[0]?.message?.content;
-    if (typeof content !== "string")
-      throw new Error("AI extraction returned no structured result.");
+    if (typeof content !== "string") {
+      throw new OpenRouterRequestError(
+        "response",
+        undefined,
+        "AI extraction returned no structured result.",
+      );
+    }
+    const normalizedContent = content
+      .trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
     let json: unknown;
     try {
-      json = JSON.parse(content);
+      json = JSON.parse(normalizedContent);
     } catch {
-      throw new Error("AI extraction returned malformed JSON.");
+      throw new OpenRouterRequestError(
+        "response",
+        undefined,
+        "AI extraction returned malformed JSON.",
+      );
     }
-    return extractionSchema.parse(json);
+    try {
+      return extractionSchema.parse(normalizeDecimalFields(json));
+    } catch {
+      throw new OpenRouterRequestError(
+        "response",
+        undefined,
+        "AI extraction returned schema-invalid data.",
+      );
+    }
+  } catch (error) {
+    if (error instanceof OpenRouterRequestError) throw error;
+    if (
+      error instanceof Error &&
+      (error.name === "AbortError" || error.message.toLowerCase().includes("timeout"))
+    ) {
+      throw new OpenRouterRequestError("timeout", undefined, "OpenRouter request timeout.");
+    }
+    throw new OpenRouterRequestError("network");
   } finally {
     clearTimeout(timeout);
   }
