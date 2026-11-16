@@ -58,6 +58,8 @@ export const copy = {
         "Entre para acompanhar suas solicitações, cotações e decisões de compra.",
       loginPrompt: "Ainda não usa o QuoteAI?",
       loginLink: "Criar conta",
+      invalidConfirmationLink:
+        "Este link de confirmação é inválido ou expirou. Solicite um novo link.",
       signupTitle: "Centralize suas compras",
       signupDescription:
         "Crie seu espaço de trabalho e organize cada etapa da cotação com mais segurança.",
@@ -188,6 +190,8 @@ export const copy = {
         "Sign in to follow your requests, quotations, and purchasing decisions.",
       loginPrompt: "New to QuoteAI?",
       loginLink: "Create an account",
+      invalidConfirmationLink:
+        "This confirmation link is invalid or has expired. Request a new link.",
       signupTitle: "Centralize your purchasing",
       signupDescription:
         "Create your workspace and manage every stage of quotation with more confidence.",

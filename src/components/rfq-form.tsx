@@ -11,7 +11,7 @@ import type { Locale } from "@/lib/locale/types";
 type RequestedItem = {
   id: string;
   description: string;
-  quantity: number;
+  quantity: string;
   unit: string;
   specifications: string;
 };
@@ -19,7 +19,7 @@ type RequestedItem = {
 const createItem = (id: string, unit: string): RequestedItem => ({
   id,
   description: "",
-  quantity: 1,
+  quantity: "1",
   unit,
   specifications: "",
 });
@@ -229,7 +229,7 @@ export function RfqForm({ locale }: { locale: Locale }) {
                       value={item.quantity}
                       onChange={(event) =>
                         updateItem(index, {
-                          quantity: Number(event.target.value),
+                          quantity: event.target.value,
                         })
                       }
                       className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-950 shadow-sm transition focus:border-blue-600 focus:ring-3 focus:ring-blue-100"

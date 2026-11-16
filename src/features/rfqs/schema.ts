@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { positiveDecimal } from "@/lib/money";
 export const rfqSchema = z.object({
   title: z.string().trim().min(2).max(160),
   description: z.string().trim().max(4000).optional(),
@@ -7,7 +8,7 @@ export const rfqSchema = z.object({
     .array(
       z.object({
         description: z.string().trim().min(1),
-        quantity: z.coerce.number().positive(),
+        quantity: positiveDecimal,
         unit: z.string().trim().min(1),
         specifications: z.string().optional(),
       }),

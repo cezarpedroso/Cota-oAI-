@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuoteAI
 
-## Getting Started
+QuoteAI is a procurement workspace for creating RFQs, collecting supplier
+quotations, and reviewing AI-assisted extraction before a user saves data.
 
-First, run the development server:
+## Local setup
+
+1. Install dependencies with `npm install`.
+2. Copy `.env.example` to `.env.local` and fill in the required values.
+3. Run `npm run dev` and open `http://localhost:3000`.
+
+`OPENROUTER_API_KEY` is server-only. Do not use a `NEXT_PUBLIC_` prefix and do
+not commit `.env.local`.
+
+## Quality checks
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx tsc --noEmit
+npm run lint
+npm run test --if-present
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The default test command runs offline unit and component tests only.
+Use `npm run test:integration` explicitly for live RLS tests with two ordinary
+test users against a dedicated test database.
+See [Phase 0 verification](docs/phase0-verification.md) for numeric rules,
+the pending corrective migration, disposable PostgreSQL tests, and smoke testing.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Vercel deployment configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Add the following environment variables to the Vercel Production environment:
 
-## Learn More
+| Variable                               | Visibility           | Purpose                               |
+| -------------------------------------- | -------------------- | ------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Public               | Supabase project URL                  |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Public               | Browser-safe Supabase publishable key |
+| `OPENROUTER_API_KEY`                   | Secret               | Server-only OpenRouter credential     |
+| `OPENROUTER_MODEL_PRIMARY`             | Secret/configuration | Primary OpenRouter model identifier   |
 
-To learn more about Next.js, take a look at the following resources:
+Do not add test-user variables to Vercel Production. Never configure a
+Supabase service-role key in this application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+In Supabase Auth, set the **Site URL** to the production Vercel URL and add
+`https://your-production-domain/auth/callback` to **Redirect URLs**. Add a
+preview callback URL only if Vercel preview deployments must support email
+confirmation.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Enable Supabase Auth's leaked-password protection before public signup.
 
-## Deploy on Vercel
+## AI extraction limits
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The migration `ai_extraction_quotas` introduces a database-enforced quota of
+5 extraction requests per user per minute and 50 per user per day. The values
+are stored in the private `ai_extraction_limit_config` table and can only be
+changed by a database administrator. There are no direct API grants to quota
+or usage tables.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The migration must be reviewed and applied to the intended Supabase project
+before enabling OpenRouter extraction in production. The application does not
+send supplier text to OpenRouter when quota consumption fails.
+
+## Production smoke test
+
+After deployment, use a non-production test account to:
+
+1. Sign up and complete email confirmation through `/auth/callback`.
+2. Confirm an invalid callback URL returns to login with a safe error.
+3. Sign in, create an RFQ, and verify another test user cannot read it.
+4. Create a manual quotation with nullable commercial fields.
+5. Run one approved AI extraction and confirm results remain a review-only
+   draft until the user submits the quotation form.
+6. Verify the per-minute and daily limits using a dedicated test account.
+
+Do not use production supplier data or paid OpenRouter calls for automated
+tests.

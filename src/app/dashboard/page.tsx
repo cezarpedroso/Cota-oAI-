@@ -21,10 +21,10 @@ export default async function Dashboard() {
   const locale = await getLocale();
   const t = getCopy(locale).dashboard;
   const [
-    { count: rfqs },
-    { count: drafts },
-    { count: quotes },
-    { data: recent },
+    { count: rfqs, error: rfqsError },
+    { count: drafts, error: draftsError },
+    { count: quotes, error: quotesError },
+    { data: recent, error: recentError },
   ] = await Promise.all([
     s.from("rfq_sessions").select("*", { count: "exact", head: true }),
     s
@@ -38,6 +38,28 @@ export default async function Dashboard() {
       .order("created_at", { ascending: false })
       .limit(5),
   ]);
+  if (rfqsError || draftsError || quotesError || recentError) {
+    return (
+      <AppShell email={user.email ?? ""}>
+        <section
+          role="alert"
+          className="m-8 rounded-lg border border-red-200 bg-white p-6"
+        >
+          <h1 className="text-xl font-semibold">
+            {locale === "en" ? "Dashboard unavailable" : "Painel indisponível"}
+          </h1>
+          <p className="my-3">
+            {locale === "en"
+              ? "We could not load your data. No counts are shown because they could be incorrect."
+              : "Não foi possível carregar seus dados. Os totais não serão exibidos para evitar informações incorretas."}
+          </p>
+          <Link href="/dashboard" className="text-blue-700 underline">
+            {locale === "en" ? "Try again" : "Tentar novamente"}
+          </Link>
+        </section>
+      </AppShell>
+    );
+  }
   const stats: { label: string; value: number | null; icon: LucideIcon }[] = [
     { label: t.requests, value: rfqs, icon: ClipboardList },
     { label: t.drafts, value: drafts, icon: FileText },

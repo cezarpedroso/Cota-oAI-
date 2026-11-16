@@ -4,7 +4,12 @@ import { rfqSchema } from "./schema";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 export async function createRfq(form: FormData) {
-  const raw = JSON.parse(String(form.get("payload") || "{}"));
+  let raw: unknown;
+  try {
+    raw = JSON.parse(String(form.get("payload") || "{}"));
+  } catch {
+    throw new Error("Dados da solicitação inválidos.");
+  }
   const p = rfqSchema.safeParse(raw);
   if (!p.success) throw new Error("Dados da solicitação inválidos.");
   const s = await createClient();

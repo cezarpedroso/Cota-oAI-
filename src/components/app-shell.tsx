@@ -71,6 +71,19 @@ export async function AppShell({
             {t.newRequest}
           </Link>
         </header>
+        <nav
+          aria-label={locale === "en" ? "Mobile navigation" : "Navegação móvel"}
+          className="flex flex-wrap items-center gap-4 border-b bg-white px-5 py-3 text-sm lg:hidden"
+        >
+          {nav.map(({ href, label }) => (
+            <Link key={href} href={href} className="font-medium text-blue-700">
+              {label}
+            </Link>
+          ))}
+          <form action={logout} className="ml-auto">
+            <button className="font-medium">{t.signOut}</button>
+          </form>
+        </nav>
         {children}
       </main>
     </div>

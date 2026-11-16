@@ -21,7 +21,7 @@ export default async function Page({
   const { id } = await params;
   const { data } = await supabase
     .from("rfq_sessions")
-    .select("*,rfq_items(*),vendor_quotes(*)")
+    .select("*,rfq_items(id,description,quantity::text,unit),vendor_quotes(*)")
     .eq("id", id)
     .maybeSingle();
 
@@ -85,7 +85,7 @@ export default async function Page({
               (item: {
                 id: string;
                 description: string;
-                quantity: number;
+                quantity: string;
                 unit: string;
               }) => (
                 <div

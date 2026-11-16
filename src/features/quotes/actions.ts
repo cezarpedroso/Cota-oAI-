@@ -1,15 +1,31 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { quoteSchema } from "./schema";
-import { redirect } from "next/navigation";
-export async function createQuote(form: FormData) {
-  const rfqId = String(form.get("rfqId"));
-  const p = quoteSchema.safeParse(
-    JSON.parse(String(form.get("payload") || "{}")),
-  );
-  if (!p.success) throw new Error("Cotação inválida.");
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+export async function createQuote(
+  rfqId: string,
+  payload: unknown,
+): Promise<
+  | { href: string; error: null }
+  | { href: null; error: "invalid" | "unauthorized" | "save" }
+> {
+  const parsedId = z.string().uuid().safeParse(rfqId);
+  const p = quoteSchema.safeParse(payload);
+  if (!parsedId.success || !p.success) return { href: null, error: "invalid" };
   const s = await createClient();
-  if (!(await s.auth.getUser()).data.user) redirect("/login");
+  const {
+    data: { user },
+    error: authError,
+  } = await s.auth.getUser();
+  if (authError || !user) return { href: null, error: "unauthorized" };
+  const owner = await s
+    .from("rfq_sessions")
+    .select("id")
+    .eq("id", rfqId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (owner.error || !owner.data) return { href: null, error: "unauthorized" };
   const { data, error } = await s.rpc("create_quote_atomic", {
     p_rfq_id: rfqId,
     p_vendor_name: p.data.vendorName,
@@ -22,6 +38,9 @@ export async function createQuote(form: FormData) {
     p_payment_terms: p.data.paymentTerms || "",
     p_items: p.data.items,
   });
-  if (error || !data) throw new Error("Não foi possível criar a cotação.");
-  redirect(`/rfqs/${rfqId}/quotes/${data}`);
+  if (error || !data) return { href: null, error: "save" };
+  revalidatePath("/dashboard");
+  revalidatePath("/rfqs");
+  revalidatePath(`/rfqs/${rfqId}`);
+  return { href: `/rfqs/${rfqId}/quotes/${data}`, error: null };
 }
